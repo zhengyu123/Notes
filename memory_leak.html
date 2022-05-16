@@ -1,0 +1,556 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title>Hunt for Memory Leaks</title>
+	<meta name="generator" content="LibreOffice 7.2.6.2 (Linux)"/>
+	<meta name="created" content="00:00:00"/>
+	<meta name="changed" content="2022-05-06T10:10:56.532347655"/>
+	<meta name="" content=""/>
+	<meta name="created" content="00:00:00">
+	<meta name="created" content="00:00:00">
+	<style type="text/css">
+		@page { size: 8.5in 11in; margin-left: 0.79in; margin-right: 0.39in; margin-top: 0.39in; margin-bottom: 0.39in }
+		p { line-height: 115%; margin-bottom: 0.1in; background: transparent; background: transparent }
+		h1 { margin-bottom: 0.08in; background: transparent; background: transparent; page-break-after: avoid }
+		h1.western { font-family: "Liberation Serif", serif; font-size: 24pt; font-weight: bold }
+		h1.cjk { font-family: "Source Han Serif CN"; font-size: 24pt; font-weight: bold }
+		h1.ctl { font-family: "Lohit Devanagari"; font-size: 24pt; font-weight: bold }
+		td p { orphans: 0; widows: 0; background: transparent; background: transparent }
+		th p { font-weight: bold; text-align: center; orphans: 0; widows: 0; background: transparent; background: transparent }
+		h3 { margin-top: 0.1in; margin-bottom: 0.08in; background: transparent; page-break-after: avoid }
+		h3.western { font-family: "Liberation Sans", sans-serif; font-size: 14pt; font-weight: bold }
+		h3.cjk { font-family: "Source Han Sans CN"; font-size: 14pt; font-weight: bold }
+		h3.ctl { font-family: "Lohit Devanagari"; font-size: 14pt; font-weight: bold }
+		h4 { margin-top: 0.08in; margin-bottom: 0.08in; background: transparent; page-break-after: avoid }
+		h4.western { font-family: "Liberation Sans", sans-serif; font-size: 13pt; font-style: italic; font-weight: bold }
+		h4.cjk { font-family: "Source Han Sans CN"; font-size: 13pt; font-style: italic; font-weight: bold }
+		h4.ctl { font-family: "Lohit Devanagari"; font-size: 13pt; font-style: italic; font-weight: bold }
+		a:link { color: #000080; so-language: zxx; text-decoration: underline }
+		a:visited { color: #800000; so-language: zxx; text-decoration: underline }
+		code { font-family: "Liberation Mono", monospace }
+	</style>
+</head>
+<body lang="en-US" link="#000080" vlink="#800000" dir="ltr">
+<div title="header"><h3 class="western" style="margin-bottom: 0.2in"></h3>
+</div>
+<table width="703" cellpadding="4" cellspacing="0" style="page-break-before: always">
+	<col width="105"/>
+
+	<col width="580"/>
+
+	<tr>
+		<td colspan="2" width="693" valign="top" style="border: 1px solid #000000; padding: 0.04in"><p>
+			AWT/2D</p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="105" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in">
+			<ol><p align="left" style="orphans: 2; widows: 2; border: none; padding: 0in">
+				<span style="display: inline-block; border: none; padding: 0in"><span style="font-variant: normal"><font color="#0065ff"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt"><span style="letter-spacing: normal"><span style="font-style: normal"><u><span style="font-weight: normal"><a href="https://bugs.openjdk.java.net/browse/JDK-8282628">8282628</span></span></u></span></a></p>
+			</ol>
+		</td>
+		<td width="580" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><h1 class="western" align="left" style="font-variant: normal; font-style: normal; font-weight: normal; orphans: 2; widows: 2; margin-top: 0in; border: none; padding: 0in">
+			<font color="#172b4d"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt">Potential
+			memory leak in sun.font.FontConfigManager.getFontConfig()</font></font></font></h1>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="105" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in">
+			<ol><p align="left" style="orphans: 2; widows: 2; border: none; padding: 0in">
+				<span style="display: inline-block; border: none; padding: 0in"><span style="font-variant: normal"><font color="#0065ff"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt"><span style="letter-spacing: normal"><span style="font-style: normal"><u><span style="font-weight: normal"><a href="https://bugs.openjdk.java.net/browse/JDK-8282879">8282879</span></span></u></span></a></p>
+			</ol>
+		</td>
+		<td width="580" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; orphans: 2; widows: 2">
+			<font color="#172b4d"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt">Potential
+			leak icon handles in AwtWindow::SetIconData()</font></font></font></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="105" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in">
+			<ol><p align="left" style="orphans: 2; widows: 2; border: none; padding: 0in">
+				<span style="display: inline-block; border: none; padding: 0in"><span style="font-variant: normal"><font color="#0065ff"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt"><span style="letter-spacing: normal"><span style="font-style: normal"><u><span style="font-weight: normal"><a href="https://bugs.openjdk.java.net/browse/JDK-8283217">8283217</span></span></u></span></a></p>
+			</ol>
+		</td>
+		<td width="580" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; orphans: 2; widows: 2">
+			<font color="#172b4d"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt">Leak
+			FcObjectSet in getFontConfigLocations() in fontpath.c</font></font></font></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="105" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in">
+			<ol><p align="left" style="orphans: 2; widows: 2; border: none; padding: 0in">
+				<a href="https://bugs.openjdk.java.net/browse/JDK-8284023"><span style="font-variant: normal"><font color="#0052cc"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt"><span style="letter-spacing: normal"><span style="font-style: normal"><u><span style="font-weight: normal">8284023</span></u></span></a></p>
+			</ol>
+		</td>
+		<td width="580" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; orphans: 2; widows: 2">
+			<font color="#172b4d"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt">java.sun.awt.X11GraphicsDevice.getDoubleBufferVisuals()
+			leaks XdbeScreenVisualInfo</font></font></font></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="105" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in">
+			<ol><p align="left" style="orphans: 2; widows: 2; border: none; padding: 0in">
+				<span style="display: inline-block; border: none; padding: 0in"><span style="font-variant: normal"><font color="#0065ff"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt"><span style="letter-spacing: normal"><span style="font-style: normal"><u><span style="font-weight: normal"><a href="https://bugs.openjdk.java.net/browse/JDK-8284033">8284033</span></span></u></span></a></p>
+			</ol>
+		</td>
+		<td width="580" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; orphans: 2; widows: 2">
+			<font color="#172b4d"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt">Leak
+			XVisualInfo in getAllConfigs in awt_GraphicsEnv.c</font></font></font></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="105" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in">
+			<ol><p align="left" style="orphans: 2; widows: 2; border: none; padding: 0in">
+				<a href="https://bugs.openjdk.java.net/browse/JDK-8284093"><span style="font-variant: normal"><font color="#0065ff"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt"><span style="letter-spacing: normal"><span style="font-style: normal"><u><span style="font-weight: normal">8284093</span></u></span></a></p>
+			</ol>
+		</td>
+		<td width="580" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; orphans: 2; widows: 2">
+			<font color="#172b4d"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt">Memory
+			leak: X11SD_DisposeXImage should also free obdata</font></font></font></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="105" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in">
+			<ol start="0"><p align="left" style="orphans: 2; widows: 2; border: none; padding: 0in">
+				<a href="https://bugs.openjdk.java.net/browse/JDK-8284680"><span style="font-variant: normal"><font color="#0052cc"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt"><span style="letter-spacing: normal"><span style="font-style: normal"><u><span style="font-weight: normal">8284680</span></u></span></a></p>
+			</ol>
+		</td>
+		<td width="580" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; orphans: 2; widows: 2">
+			<font color="#172b4d"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt">sun.font.FontConfigManager.getFontConfig()
+			leaks charset</font></font></font></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="105" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in">
+			<ol start="0"><p align="left" style="orphans: 2; widows: 2; border: none; padding: 0in">
+				<span style="display: inline-block; border: none; padding: 0in"><span style="font-variant: normal"><font color="#0065ff"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt"><span style="letter-spacing: normal"><span style="font-style: normal"><u><span style="font-weight: normal"><a href="https://bugs.openjdk.java.net/browse/JDK-8284956">8284956</span></span></u></span></a></p>
+			</ol>
+		</td>
+		<td width="580" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; orphans: 2; widows: 2">
+			<font color="#172b4d"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt">Potential
+			leak awtImageData/color_data when initializes
+			X11GraphicsEnvironment</font></font></font></p>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" width="693" valign="top" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+			I18n</p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="105" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in">
+			<ol><p align="left" style="orphans: 2; widows: 2; border: none; padding: 0in">
+				<span style="display: inline-block; border: none; padding: 0in"><span style="font-variant: normal"><font color="#0065ff"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt"><span style="letter-spacing: normal"><span style="font-style: normal"><u><span style="font-weight: normal"><a href="https://bugs.openjdk.java.net/browse/JDK-8282887">8282887</span></span></u></span></a></p>
+			</ol>
+		</td>
+		<td width="580" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; orphans: 2; widows: 2">
+			<font color="#172b4d"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt">Potential
+			memory leak in
+			sun.util.locale.provider.HostLocaleProviderAdapterImpl.getNumberPattern()
+			on Windows</font></font></font></p>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" width="693" valign="top" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+			Hotspot</p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="105" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in">
+			<ol><p align="left" style="orphans: 2; widows: 2; border: none; padding: 0in">
+				<span style="display: inline-block; border: none; padding: 0in"><span style="font-variant: normal"><font color="#0065ff"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt"><span style="letter-spacing: normal"><span style="font-style: normal"><u><span style="font-weight: normal"><a href="https://bugs.openjdk.java.net/browse/JDK-8283379">8283379</span></span></u></span></a></p>
+			</ol>
+		</td>
+		<td width="580" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; orphans: 2; widows: 2">
+			<font color="#172b4d"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt">Memory
+			leak in FileHeaderHelper</font></font></font></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="105" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in">
+			<ol><p align="left" style="orphans: 2; widows: 2; border: none; padding: 0in">
+				<span style="display: inline-block; border: none; padding: 0in"><span style="font-variant: normal"><font color="#0065ff"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt"><span style="letter-spacing: normal"><span style="font-style: normal"><u><span style="font-weight: normal"><a href="https://bugs.openjdk.java.net/browse/JDK-8283469">8283469</span></span></u></span></a></p>
+			</ol>
+		</td>
+		<td width="580" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; orphans: 2; widows: 2">
+			<font color="#172b4d"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt">Don't
+			use memset to initialize members in FileMapInfo and fix memory
+			leak</font></font></font></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="105" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in">
+			<ol><p align="left" style="orphans: 2; widows: 2; border: none; padding: 0in">
+				<a href="https://bugs.openjdk.java.net/browse/JDK-8284458"><span style="font-variant: normal"><font color="#0052cc"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt"><span style="letter-spacing: normal"><span style="font-style: normal"><u><span style="font-weight: normal">8284458</span></u></span></a></p>
+			</ol>
+		</td>
+		<td width="580" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; orphans: 2; widows: 2">
+			<font color="#172b4d"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt">CodeHeapState::aggregate()
+			leaks blob_name</font></font></font></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="105" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in">
+			<ol><p align="left" style="orphans: 2; widows: 2; border: none; padding: 0in">
+				<a href="https://bugs.openjdk.java.net/browse/JDK-8284532"><span style="font-variant: normal"><font color="#0052cc"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt"><span style="letter-spacing: normal"><span style="font-style: normal"><u><span style="font-weight: normal">8284532</span></u></span></a></p>
+			</ol>
+		</td>
+		<td width="580" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; orphans: 2; widows: 2">
+			<font color="#172b4d"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt">Memory
+			leak in BitSet::BitMapFragmentTable in JFR leak profiler</font></font></font></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="105" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in">
+			<ol><p align="left" style="orphans: 2; widows: 2; border: none; padding: 0in">
+				<a href="https://bugs.openjdk.java.net/browse/JDK-8284549"><span style="font-variant: normal"><font color="#0052cc"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt"><span style="letter-spacing: normal"><span style="font-style: normal"><u><span style="font-weight: normal">8284549</span></u></span></a></p>
+			</ol>
+		</td>
+		<td width="580" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; orphans: 2; widows: 2">
+			<font color="#172b4d"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt">JFR:
+			FieldTable leaks FieldInfoTable member</font></font></font></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="105" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in">
+			<ol><p align="left" style="orphans: 2; widows: 2; border: none; padding: 0in">
+				<a href="https://bugs.openjdk.java.net/browse/JDK-8284620"><span style="font-variant: normal"><font color="#0052cc"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt"><span style="letter-spacing: normal"><span style="font-style: normal"><u><span style="font-weight: normal">8284620</span></u></span></a></p>
+			</ol>
+		</td>
+		<td width="580" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p align="left" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; orphans: 2; widows: 2">
+			<font color="#172b4d"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt">CodeBuffer
+			may leak _overflow_arena</font></font></font></p>
+		</td>
+	</tr>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h4 class="western">Leaks not fixed</h4>
+<table width="697" cellpadding="4" cellspacing="0">
+	<col width="381"/>
+
+	<col width="298"/>
+
+	<tr valign="top">
+		<th width="381" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+			Description 
+			</p>
+		</th>
+		<th width="298" style="border: 1px solid #000000; padding: 0.04in"><p>
+			Reason for not fixing 
+			</p>
+		</th>
+	</tr>
+	<tr valign="top">
+		<td width="381" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+			ZGC/Shenandoah GC leak <code><a href="https://github.com/openjdk/jdk/blob/master/src/hotspot/share/memory/universe.cpp#L728"><font color="#000000"><font size="2" style="font-size: 10pt">DefaultICProtectionBehaviour</font></font></a></code><font color="#000000"><font size="2" style="font-size: 10pt">
+			</font></font>
+			</p>
+		</td>
+		<td width="298" style="border: 1px solid #000000; padding: 0.04in"><p>
+			One time small leak, not worth contaminating shared code with GC
+			options 
+			</p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="381" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p style="margin-bottom: 0.2in; background: transparent; border: none; padding: 0in; background: #ffffff">
+			<p style="background: transparent; border: none; padding: 0in; background: #ffffff">
+				8 bytes in 1 blocks are definitely lost in loss record 81 of 15,929
+				<pre>
+  at 0x484486F: malloc (vg_replace_malloc.c:381)
+  by 0x4939FEE: strdup (strdup.c:42)
+  by 0x4891FD8: JLI_StringDup (jli_util.c:69)
+  by 0x488F65B: SelectVersion (java.c:1110)
+  by 0x488F65B: JLI_Launch (java.c:279)
+  by 0x109203: main (main.c:206)
+			</pre></p>
+		</td>
+		<td width="298" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+			Immortal, has lifespan of JVM</p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="381" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p style="margin-bottom: 0.2in; background: transparent; border: none; padding: 0in; background: #ffffff">
+			8 bytes in 1 blocks are definitely lost in loss record 82 of 15,929</p>
+		<p style="background: transparent; border: none; padding: 0in; background: #ffffff"><pre>
+  by 0x5AF81AE: os::malloc(unsigned long, MEMFLAGS, NativeCallStack const&amp;) (os.cpp:636)
+  by 0x5286866: AllocateHeap (allocation.cpp:42)
+  by 0x5286866: AllocateHeap(unsigned long, MEMFLAGS, AllocFailStrategy::AllocFailEnum) (allocation.cpp:52)
+  by 0x5CA4D5B: operator new (allocation.hpp:198)
+  by 0x5CA4D5B: StatSampler::create_sampled_perfdata() (statSampler.cpp:329)
+  by 0x5CA4F37: StatSampler::create_misc_perfdata() (statSampler.cpp:305)
+  by 0x5CA4F7D: initialize (statSampler.cpp:67)
+  by 0x5CA4F7D: initialize (statSampler.cpp:60)</pre></p>
+		</td>
+		<td width="298" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+			Immortal, has lifespan of JVM</p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="381" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p style="background: transparent; border: none; padding: 0in; background: #ffffff">
+			31 bytes in 1 blocks are definitely lost in loss record 2,522 of 9,854<br/><pre>
+  at 0x484486F: malloc (vg_replace_malloc.c:381)
+  by 0x5AF81AE: malloc (os.cpp:660)
+  by 0x5AF81AE: os::malloc(unsigned long, MEMFLAGS, NativeCallStack const&amp;) (os.cpp:636)
+  by 0x5286866: AllocateHeap (allocation.cpp:42)
+  by 0x5286866: AllocateHeap(unsigned long, MEMFLAGS, AllocFailStrategy::AllocFailEnum) (allocation.cpp:52)
+  by 0x5B43EED: get_sharedmem_filename (perfMemory_posix.cpp:681)
+  by 0x5B43EED: mmap_create_shared (perfMemory_posix.cpp:973)
+  by 0x5B43EED: create_shared_memory (perfMemory_posix.cpp:1049)
+  by 0x5B43EED: PerfMemory::create_memory_region(unsigned long) (perfMemory_posix.cpp:1232)
+  by 0x5B434A0: PerfMemory::initialize() [clone .part.0] (perfMemory.cpp:107)
+  by 0x56D4BB1: vm_init_globals() (init.cpp:106)
+  by 0x5D60F2E: Threads::create_vm(JavaVMInitArgs*, bool*) (thread.cpp:2719)
+  by 0x5793781: JNI_CreateJavaVM_inner (jni.cpp:3615)
+  by 0x5793781: JNI_CreateJavaVM (jni.cpp:3703)
+  by 0x488C95A: InitializeJVM (java.c:1459)
+  by 0x488C95A: JavaMain (java.c:411)
+  by 0x4890A18: ThreadJavaMain (java_md.c:651)
+  by 0x4927B19: start_thread (pthread_create.c:443)
+  by 0x49AB8F3: clone (clone.S:100)</pre></p>
+		</td>
+		<td width="298" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p style="margin-bottom: 0.2in">
+			</p>
+			<p style="margin-bottom: 0.2in"><a href="https://github.com/openjdk/jdk/blob/master/src/hotspot/os/posix/perfMemory_posix.cpp#L1065">See source code comment</a></p>
+			<p style="margin-bottom: 0.2in"><br/>
+<br/>
+
+			</p>
+			<p style="margin-bottom: 0.2in"><br/>
+<br/>
+
+			</p>
+			<p><br/>
+
+			</p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="381" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p style="background: transparent; border: none; padding: 0in; background: #ffffff">
+			-XX:+RecordDynamicDumpInfo</p>
+		</td>
+		<td width="298" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+			It is only used for CDS dumping</p>
+		</td>
+	</tr>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h4 class="western">False negative cases</h4>
+<table width="100%" cellpadding="4" cellspacing="0">
+	<col width="146*"/>
+
+	<col width="110*"/>
+
+	<tr valign="top">
+		<td width="57%" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p style="margin-bottom: 0in; background: transparent; border: none; padding: 0in; background: #ffffff"><pre>
+  Invalid write of size 4
+  at 0x16836639: ???
+  by 0x1682ACC5: ???
+  by 0x56FE2A4: JavaCalls::call_helper(JavaValue*, methodHandle const&amp;, JavaCallArguments*, JavaThread*) (javaCalls.cpp:416)
+  by 0x56DF188: InstanceKlass::call_class_initializer(JavaThread*) (instanceKlass.cpp:1529)
+  by 0x56E06C4: InstanceKlass::initialize_impl(JavaThread*) (instanceKlass.cpp:1176)
+  by 0x5D60353: initialize_class (thread.cpp:687)
+  by 0x5D60353: Threads::initialize_java_lang_classes(JavaThread*, JavaThread*) (thread.cpp:2540)
+  by 0x5D61280: Threads::create_vm(JavaVMInitArgs*, bool*) (thread.cpp:2827)
+  by 0x5793781: JNI_CreateJavaVM_inner (jni.cpp:3615)
+  by 0x5793781: JNI_CreateJavaVM (jni.cpp:3703)
+  by 0x488C95A: InitializeJVM (java.c:1459)
+  by 0x488C95A: JavaMain (java.c:411)
+  by 0x4890A18: ThreadJavaMain (java_md.c:651)
+  by 0x4927B19: start_thread (pthread_create.c:443)
+  by 0x49AB8F3: clone (clone.S:100)
+</pre>
+
+			</p>
+			<p style="background: transparent"><br/>
+
+			</p>
+		</td>
+		<td width="43%" style="border: 1px solid #000000; padding: 0.04in"><p>
+			Interpreter stack banging:</p><pre><code>
+  0x0000000016836639:   mov    %eax,-0x1000(%rsp)
+  0x0000000016836640:   mov    %eax,-0x2000(%rsp)
+  0x0000000016836647:   mov    %eax,-0x3000(%rsp)
+  0x000000001683664e:   mov    %eax,-0x4000(%rsp)
+  0x0000000016836655:   mov    %eax,-0x5000(%rsp)
+  0x000000001683665c:   mov    %eax,-0x6000(%rsp)
+  0x0000000016836663:   mov    %eax,-0x7000(%rsp)
+  0x000000001683666a:   mov    %eax,-0x8000(%rsp)
+		</code></pre>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="57%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p style="margin-bottom: 0in; background: transparent; border: none; padding: 0in; background: #ffffff">
+			32 bytes in 1 blocks are definitely lost in loss record 4,617 of
+			9,854<br/>
+		<pre>
+  at 0x484486F: malloc (vg_replace_malloc.c:381)
+  by 0x5AF81AE: malloc (os.cpp:660)
+  by 0x5AF81AE: os::malloc(unsigned long, MEMFLAGS, NativeCallStack const&amp;) (os.cpp:636)
+  by 0x5286866: AllocateHeap (allocation.cpp:42)
+  by 0x5286866: AllocateHeap(unsigned long, MEMFLAGS, AllocFailStrategy::AllocFailEnum) (allocation.cpp:52)
+  by 0x54A4290: operator new (allocation.hpp:198)
+  by 0x54A4290: CompiledIC::compute_monomorphic_entry(methodHandle const&amp;, Klass*, bool, bool, bool, CompiledICInfo&amp;,
+                                                      JavaThread*) (compiledIC.cpp:553)
+  by 0x5BB5D74: SharedRuntime::resolve_sub_helper_internal(methodHandle, frame
+                                                      const&amp;, CompiledMethod*, bool, bool, Handle, CallInfo&amp;,
+                                                      Bytecodes::Code, JavaThread*) (sharedRuntime.cpp:1286)
+  by 0x5BBABA2: SharedRuntime::resolve_sub_helper(bool, bool, JavaThread*) (sharedRuntime.cpp:1426)
+  by 0x5BBAC87: SharedRuntime::resolve_helper(bool, bool, JavaThread*) (sharedRuntime.cpp:1233)
+  by 0x5BBAF5B: SharedRuntime::resolve_virtual_call_C(JavaThread*) (sharedRuntime.cpp:1560)</pre></p>
+			<p style="background: transparent"><br/>
+
+			</p>
+		</td>
+		<td width="43%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+			Not a real leak. CompiledIC is attached to compiled code, will be
+			released at a safepoint once it is no longer used.</p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="57%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p style="margin-bottom: 0in; background: transparent; border: none; padding: 0in; background: #ffffff">
+			48 bytes in 1 blocks are definitely lost in loss record 5,956 of
+			9,854<br/><pre>
+  at 0x484486F: malloc (vg_replace_malloc.c:381)
+  by 0x5AF81AE: malloc (os.cpp:660)
+  by 0x5AF81AE: os::malloc(unsigned long, MEMFLAGS, NativeCallStack const&amp;) (os.cpp:636)
+  by 0x52867C6: AllocateHeap(unsigned long, MEMFLAGS, NativeCallStack const&amp;, AllocFailStrategy::AllocFailEnum)
+			    (allocation.cpp:42)
+  by 0x528FD68: Arena::operator new(unsigned long, MEMFLAGS) (arena.cpp:286)
+  by 0x532C8ED: init_c1_runtime (c1_Compiler.cpp:52)
+  by 0x532C8ED: Compiler::initialize() (c1_Compiler.cpp:74)
+  by 0x5499D3C: CompileBroker::init_compiler_runtime() (compileBroker.cpp:1787)
+  by 0x54A003B: CompileBroker::compiler_thread_loop() (compileBroker.cpp:1924)
+  by 0x5D5D65D: JavaThread::thread_main_inner() (thread.cpp:1292)
+  by 0x5D633DF: Thread::call_run() (thread.cpp:356)
+  by 0x5B033C7: thread_native_entry(Thread*) (os_linux.cpp:706)
+  by 0x4927B19: start_thread (pthread_create.c:443)
+  by 0x49AB8F3: clone (clone.S:100)</pre></p>
+			<p style="background: transparent"><br/>
+
+			</p>
+		</td>
+		<td width="43%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+			Immortal. The arena has no root reference.</p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="57%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p style="margin-bottom: 0in; background: transparent; border: none; padding: 0in; background: #ffffff">
+			24 bytes in 1 blocks are indirectly lost in loss record 2,439 of
+			9,854<br/><pre>
+  at 0x484486F: malloc (vg_replace_malloc.c:381)
+  by 0x5AF81AE: malloc (os.cpp:660)
+  by 0x5AF81AE: os::malloc(unsigned long, MEMFLAGS, NativeCallStack const&amp;) (os.cpp:636)
+  by 0x5286B74: AllocateHeap (allocation.cpp:42)
+  by 0x5286B74: ResourceObj::operator new(unsigned long, ResourceObj::allocation_type, MEMFLAGS) (allocation.cpp:117)
+  by 0x5D5B647: Thread::Thread() (thread.cpp:222)
+  by 0x5AD24AD: NonJavaThread (nonJavaThread.cpp:69)
+  by 0x5AD24AD: WatcherThread (nonJavaThread.cpp:161)
+  by 0x5AD24AD: WatcherThread::start() (nonJavaThread.cpp:299)
+  by 0x5D61896: Threads::create_vm(JavaVMInitArgs*, bool*) (thread.cpp:2988)
+  by 0x5793781: JNI_CreateJavaVM_inner (jni.cpp:3615)
+  by 0x5793781: JNI_CreateJavaVM (jni.cpp:3703)
+  by 0x488C95A: InitializeJVM (java.c:1459)
+  by 0x488C95A: JavaMain (java.c:411)
+  by 0x4890A18: ThreadJavaMain (java_md.c:651)
+  by 0x4927B19: start_thread (pthread_create.c:443)
+  by 0x49AB8F3: clone (clone.S:100)
+			</pre></p>
+			<p style="background: transparent"><br/>
+
+			</p>
+		</td>
+		<td width="43%" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+			Can be freed before JVM exit, e.g. from <a href="https://github.com/openjdk/jdk/blob/master/src/hotspot/share/runtime/java.cpp#L454">here</a></p>
+		</td>
+	</tr>
+</table>
+<p><br/>
+<br/>
+
+</p>
+<h3 class="western">Leaks in libraries</h3>
+<div align="left">
+	<table width="697" cellpadding="4" cellspacing="0">
+		<col width="99"/>
+
+		<col width="405"/>
+
+		<col width="167"/>
+
+		<tr valign="top">
+			<td width="99" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in">
+				<ol><p align="left" style="orphans: 2; widows: 2; border: none; padding: 0in">
+					<span style="display: inline-block; border: none; padding: 0in"><span style="font-variant: normal"><font color="#0065ff"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt"><span style="letter-spacing: normal"><span style="font-style: normal"><u><span style="font-weight: normal"><a href="https://bugs.openjdk.java.net/browse/JDK-8284449">8284449</span></span></u></span></a></p>
+				</ol>
+			</td>
+			<td width="405" style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0.04in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p align="left" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; orphans: 2; widows: 2">
+				<font color="#172b4d"><font face="DejaVu Sans, sans-serif"><font size="2" style="font-size: 10pt">valgrind
+				still complains memory leak in
+				java.sun.font.FontConfigManager.getFontConfig()</font></font></font></p>
+			</td>
+			<td width="167" style="border: 1px solid #000000; padding: 0.04in"><p style="background: transparent">
+				Leaks in font configuration library</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td colspan="2" width="512" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p style="margin-bottom: 0in; background: transparent; border: none; padding: 0in; background: #ffffff">
+				bytes in 1 blocks are definitely lost in loss record 9,797 of
+				11,596</p>
+				<p style="margin-bottom: 0in; background: transparent; border: none; padding: 0in; background: #ffffff">
+					<pre>
+  at 0x484486F: malloc (vg_replace_malloc.c:381)
+  by 0x4939AA8: __libc_alloc_buffer_allocate (alloc_buffer_allocate.c:26)
+  by 0x49D35F5: alloc_buffer_allocate (alloc_buffer.h:143)
+  by 0x49D35F5: __resolv_conf_allocate (resolv_conf.c:391)
+  by 0x49CEAAB: __resolv_conf_load (res_init.c:599)
+  by 0x49D333E: __resolv_conf_get_current (resolv_conf.c:140)
+  by 0x49CF5F4: __res_vinit (res_init.c:628)
+  by 0x49D3EFA: maybe_init (resolv_context.c:122)
+  by 0x49D4082: context_get (resolv_context.c:184)
+  by 0x49D4082: context_get (resolv_context.c:176)
+  by 0x49D4082: __resolv_context_get (resolv_context.c:195)
+  by 0x4993202: gaih_inet.constprop.0 (getaddrinfo.c:729)
+  by 0x4994638: getaddrinfo (getaddrinfo.c:2240)
+  by 0x3434453E: Java_java_net_Inet6AddressImpl_lookupAllHostAddr (Inet6AddressImpl.c:231)</pre></p>
+				<p style="background: transparent"><br/>
+
+				</p>
+			</td>
+			<td width="167" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Leak in libC</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td colspan="2" width="512" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: none; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0in"><p>
+				408 bytes in 1 blocks are definitely lost in loss record 10,516
+				of 11,596</p>
+				<p style="background: transparent; border: none; padding: 0in; background: #ffffff"><pre>
+  at 0x4849464: calloc (vg_replace_malloc.c:1328)
+  by 0x4668797F: _XimOpenIM (imInt.c:207)
+  by 0x4668D47C: UnknownInlinedFun (imInsClbk.c:201)
+  by 0x4668D47C: _XimRegisterIMInstantiateCallback (imInsClbk.c:154)
+  by 0x46679B0C: XRegisterIMInstantiateCallback (IMWrap.c:177)
+  by 0x3438CF4E: Java_sun_awt_X11_XInputMethod_openXIMNative (awt_InputMethod.c:1355)
+</pre>
+				</p>
+			</td>
+			<td width="167" style="border-top: none; border-bottom: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #000000; padding-top: 0in; padding-bottom: 0.04in; padding-left: 0.04in; padding-right: 0.04in"><p>
+				Leak in libX11</p>
+			</td>
+		</tr>
+	</table>
+</div>
+<p><br/>
+<br/>
+
+</p>
+</body>
+</html>
